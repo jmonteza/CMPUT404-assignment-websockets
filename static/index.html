@@ -21,10 +21,28 @@
         limitations under the License.
     "/>
     <script src="json2.js"></script>
+    <link rel="stylesheet" href="styles.css">
   </head> 
   <body bgcolor="white" height="100%" width="100%"> 
     <div id="debug"></div>
+     <div class="flex-header">
+    <img src="paint.png" width="50" height="50">
+    <h1 id="header">Draw with Canvas and Websockets</h1>
+   </div>
+
     <canvas id="c" width="100%" height="100%" style="-webkit-tap-highlight-color: transparent;"></canvas> 
+
+      <div class="tools">
+    <div onClick="switch_color(this)" class="selected-color active" style="background: red;"></div>
+    <div onClick="switch_color(this)" class="selected-color" style="background: blue;"></div>
+    <div onClick="switch_color(this)" class="selected-color" style="background: green;"></div>
+    <div onClick="switch_color(this)" class="selected-color" style="background: yellow;"></div>    
+    <input class="selected-custom-color" onInput="switch_custom_color(this)" type="color">
+    <button onclick="clear_canvas()">Clear Screen</button> 
+     <label id="thickness-label" for="stroke_width">Thickness</label></input>
+    <input name="stroke_width" type="range" min="1" max="100" class="stroke-width" onInput="switch_stroke(this)">
+    </div>
+   
 
     <script>
       // Fix me
@@ -36,9 +54,12 @@ var H = canvas.height = window.innerHeight-50;
 var wscounter = 0;
 var socket;
 
+var stroke_width;
+var selected_color;
+
 function debug(str) {
     var debugDiv = document.getElementById('debug');
-    debugDiv.innerHTML = "" + str;
+    // debugDiv.innerHTML = "" + str;
 }
 debug("Test");
 
@@ -48,13 +69,13 @@ world = {};
 function drawCircle(context,entity) {
     with(context) {
         beginPath();                
-        lineWidth = 3;
+        lineWidth = stroke_width;
         var x = entity["x"];
         var y = entity["y"];
-        //moveTo(x,y);
         fillStyle = entity["colour"];
         strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
+        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);
+        fill();   
         stroke();                                
     }
 }
@@ -125,6 +146,11 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
+    // console.log(entity, data);
+    entity_object = {[entity]: data}
+    // console.log(entity)
+    console.log("obj", entity_object)
+    socket.send(JSON.stringify(entity_object))
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -231,17 +257,20 @@ mouse = (function() {
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    // addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    addEntityWithoutName({'x':x,'y':y,'colour': selected_color, 'radius': stroke_width});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    // addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    addEntityWithoutName({'x':x,'y':y,'colour': selected_color, 'radius': stroke_width});
+
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'green',
-                          'radius':10});
-});
+    // addEntityWithoutName({'x':x,'y':y,'colour':'green', 'radius':10});
+    addEntityWithoutName({'x':x,'y':y,'colour': selected_color, 'radius': stroke_width});
+}); 
 
 
 function update() {
@@ -254,6 +283,8 @@ function wsSetup() {
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
+        console.log("we are connected")
+        socket.send("^^^^^^^^^^^^^^^" + "Hey, how's it going?");
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -261,7 +292,24 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //XXX: TODO What are you going to do here?   
+            // console.log("Gotcha", msg.data);    
+            entity_object = JSON.parse(msg.data);
+            console.log("Entity object: ", entity_object);     
+            key = Object.keys(entity_object)[0];
+            if (key === "clear"){
+                world = {};
+                drawNextFrame();
+            } else {
+                value = entity_object[key];
+                // console.log(key, value);
+                world[key] = value;
+                drawNextFrame();
+            }
+
+            // entity = entity_object.entity;
+            // const {entity, data} = entity_object;
+            // console.log(entity);
         } catch (e) {
             alert("socket on message: " + e);
         }
@@ -270,11 +318,74 @@ function wsSetup() {
 
 wsSetup();
 
+function clear_canvas(){
+    clear_object = {"clear": true};
+    // console.log("clearing", clear_object);
+    socket.send(JSON.stringify(clear_object));
+}
+
+function switch_custom_color(element){
+    selected_color = element.value;
+
+    element.classList.add("active");
+
+    others = document.getElementsByClassName("active");
+
+    for (other of others){
+        if (other !== element){
+            other.classList.remove("active");
+        }
+    }
+
+    header = document.getElementById("header");
+    header.style.color = selected_color;
 
 
+}
+
+function switch_color(element){
+
+    selected_color = element.style.background;
+    
+    element.classList.add("active");
+
+    others = document.getElementsByClassName("active");
+
+    for (other of others){
+        if (other !== element){
+            other.classList.remove("active");
+        }
+    }
+
+    header = document.getElementById("header");
+    header.style.color = selected_color;
+
+}
+
+function switch_stroke(element){
+    stroke_width = element.value;
+    // console.log(stroke_width);
+    let thickness_label = document.getElementById("thickness-label");
+    thickness_label.innerText = "Thickness (" + stroke_width + "px)";
+}
+
+function get_initial_stroke(){
+    var element = document.getElementsByName("stroke_width");
+    let thickness_label = document.getElementById("thickness-label");
+    thickness_label.innerText = "Thickness (" + element[0].value + "px)";
+}
+
+function windowResize() {
+  W = canvas.width = window.innerWidth - 6;
+  H = canvas.height = window.innerHeight - 50;
+};
+
+window.addEventListener('resize', windowResize);
+
+get_initial_stroke()
 
 // 30 frames per second
-setInterval( update, 1000/30.0);
+setInterval( update, 1000/60.0);
 
 
     </script>

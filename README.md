@@ -22,6 +22,8 @@ Contributors / Licensing
 
 Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle.
 
+Additional code licensed under the Apache 2 License by Justin Monteza.
+
 freetests.py is LICENSE'D under a BSD-like license:
 
 From ws4py
@@ -59,3 +61,21 @@ Contributors
 * Mark Galloway
 * Abram Hindle
 * Cole Mackenzie
+* Justin Monteza
+
+References
+========================
+Author: Abram Hindle <br />
+Author URL: https://github.com/abramhindle  <br />
+Title: WebSocketsExamples/chat.py at master · abramhindle/WebSocketsExamples · GitHub <br />
+Resource URI: https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py <br />
+
+Author: Justin Monteza <br />
+Author URL: https://github.com/jmonteza  <br />
+Title: CMPUT404-assignment-ajax/styles.css at master · jmonteza/CMPUT404-assignment-ajax · GitHub <br />
+Resource URI: https://github.com/jmonteza/CMPUT404-assignment-ajax/blob/master/static/styles.css <br />
+
+Author: Justin Monteza <br />
+Author URL: https://github.com/jmonteza  <br />
+Title: CMPUT404-assignment-ajax/index.html at master · jmonteza/CMPUT404-assignment-ajax · GitHub <br />
+Resource URI: https://github.com/jmonteza/CMPUT404-assignment-ajax/blob/master/static/index.html <br />
