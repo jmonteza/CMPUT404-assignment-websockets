@@ -70,6 +70,11 @@ Author URL: https://github.com/abramhindle  <br />
 Title: WebSocketsExamples/chat.py at master · abramhindle/WebSocketsExamples · GitHub <br />
 Resource URI: https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py <br />
 
+Author: Abram Hindle <br />
+Author URL: https://github.com/abramhindle  <br />
+Title: WebSocketsExamples/broadcaster.py at master · abramhindle/WebSocketsExamples · GitHub <br />
+Resource URI: https://github.com/abramhindle/WebSocketsExamples/blob/master/broadcaster.py <br />
+
 Author: Justin Monteza <br />
 Author URL: https://github.com/jmonteza  <br />
 Title: CMPUT404-assignment-ajax/styles.css at master · jmonteza/CMPUT404-assignment-ajax · GitHub <br />

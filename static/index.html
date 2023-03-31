@@ -3,10 +3,11 @@
   <head> 
     <title>Websockets Assignment</title> 
     <meta charset="utf-8" /> 
-    <meta content='width=device-width; height=device-height; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' name='viewport' />
+    <meta content='width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
     <meta name="license" content="
         Copyright 2013 Google, Abram Hindle
+        Copyright 2023 Justin Monteza
         
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
@@ -146,10 +147,11 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
-    // console.log(entity, data);
+
+    // Entity X1, Data {x: 376, y: 256, colour: '#FF0000', radius: 50} 
     entity_object = {[entity]: data}
-    // console.log(entity)
-    console.log("obj", entity_object)
+  
+    // Converts the JavaScript object into a JSON String and send it to the socket
     socket.send(JSON.stringify(entity_object))
 }
 var counter = 0;
@@ -257,18 +259,15 @@ mouse = (function() {
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    // addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
     addEntityWithoutName({'x':x,'y':y,'colour': selected_color, 'radius': stroke_width});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    // addEntityWithoutName({'x':x,'y':y,'colour':'red'});
     addEntityWithoutName({'x':x,'y':y,'colour': selected_color, 'radius': stroke_width});
 
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    // addEntityWithoutName({'x':x,'y':y,'colour':'green', 'radius':10});
     addEntityWithoutName({'x':x,'y':y,'colour': selected_color, 'radius': stroke_width});
 }); 
 
@@ -283,8 +282,7 @@ function wsSetup() {
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
-        console.log("we are connected")
-        socket.send("^^^^^^^^^^^^^^^" + "Hey, how's it going?");
+        console.log("Successfully opened a connection with a WebSocket");
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -292,24 +290,34 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
+
             //XXX: TODO What are you going to do here?   
-            // console.log("Gotcha", msg.data);    
             entity_object = JSON.parse(msg.data);
-            console.log("Entity object: ", entity_object);     
+            
+            console.log("Entity object: ", entity_object);   
+            
+            // Key (X0, X1, X2, ..., XN)
             key = Object.keys(entity_object)[0];
             if (key === "clear"){
+                
+                // Clear the world
                 world = {};
-                drawNextFrame();
+        
+                // Clear the frame
+                clearFrame();
+
             } else {
+                
+                // Get the value for this specific key
+                // Value: {x: 760.604736328125, y: 255.25250244140625, colour: '#FF0000', radius: 50}
                 value = entity_object[key];
-                // console.log(key, value);
+
+                // Set the key with the corresponding value
                 world[key] = value;
+
+                // Draw the next frame
                 drawNextFrame();
             }
-
-            // entity = entity_object.entity;
-            // const {entity, data} = entity_object;
-            // console.log(entity);
         } catch (e) {
             alert("socket on message: " + e);
         }
@@ -319,8 +327,10 @@ function wsSetup() {
 wsSetup();
 
 function clear_canvas(){
+    // Create a JavaScript object with clear as key, true as value
     clear_object = {"clear": true};
-    // console.log("clearing", clear_object);
+    
+    // Send a clear object to the socket to clear the canvas
     socket.send(JSON.stringify(clear_object));
 }
 
@@ -364,7 +374,6 @@ function switch_color(element){
 
 function switch_stroke(element){
     stroke_width = element.value;
-    // console.log(stroke_width);
     let thickness_label = document.getElementById("thickness-label");
     thickness_label.innerText = "Thickness (" + stroke_width + "px)";
 }
@@ -382,7 +391,7 @@ function windowResize() {
 
 window.addEventListener('resize', windowResize);
 
-get_initial_stroke()
+// get_initial_stroke();
 
 // 30 frames per second
 setInterval( update, 1000/60.0);

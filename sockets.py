@@ -15,10 +15,16 @@
 #
 
 # References:
+# 
 # Author: Abram Hindle
 # Author URL: https://github.com/abramhindle
 # Title: WebSocketsExamples (chat.py)
 # Source: https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py
+# 
+# Author: Abram Hindle
+# Author URL: https://github.com/abramhindle
+# Title: WebSocketsExamples (broadcaster.py)
+# Source: https://github.com/abramhindle/WebSocketsExamples/blob/master/broadcaster.py
 
 import flask
 from flask import Flask, request, redirect
@@ -85,9 +91,14 @@ class World:
 myWorld = World()        
 
 def broadcast_to_other_clients(message):
+
+    # Iterate through all the listeners
     for listener in myWorld.get_set_listeners():
+
+        # Need to check if the listener is a type of Client
         if isinstance(listener, Client):
-            # print(type(listener))
+
+            # Add it to the listener's queue as a JSON string
             listener.put(json.dumps(message))
 
 def set_listener( entity, data ):
@@ -105,24 +116,25 @@ def read_ws(ws,client):
     # XXX: TODO IMPLEMENT ME
     try:
         while True:
+
+            # Get the message from the websocket
             message = ws.receive()
             
             if message is not None:
-                # print(message, type(message))
+            
                 try:
+                    # Parse the JSON string and convert it to a Python dictionary
                     entity_dict = json.loads(message)
+
                 except Exception as e:
-                    # print("JSON Loads Error", e)
                     pass
+                
                 else:
-                    # print(entity_dict, type(entity_dict))
-                    # myWorld.set()
                     for key, val in entity_dict.items():
                         if key == "clear":
                             myWorld.clear()
                         else:
                             myWorld.set(key, val)
-                        # print(myWorld.world())
                         broadcast_to_other_clients(entity_dict)
 
             else:
@@ -137,20 +149,6 @@ def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
     # XXX: TODO IMPLEMENT ME
-    # message = ws.receive()
-    # print("*" * 1000, message)
-    # ws.send("Hello World!!!");
-    
-    # while not ws.closed:
-    #     message = ws.receive()
-    #     print(message)
-        # python_dict = json.loads(message)
-        # print(python_dict)
-
-        
-        # ws.send(message)
-
-    # return "Hello World!"
 
     # Create a client
     client = Client()
@@ -165,8 +163,7 @@ def subscribe_socket(ws):
         while True:
             # Get the message from client
             message = client.get()
-            # print("Message type", type(message))
-
+        
             # Send the message back to the websocket
             ws.send(message)
     except Exception as e:
