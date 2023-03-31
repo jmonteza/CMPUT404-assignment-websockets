@@ -104,6 +104,15 @@ def broadcast_to_other_clients(message):
 def set_listener( entity, data ):
     ''' do something with the update ! '''
 
+    # Iterate through all the listeners
+    for listener in myWorld.get_set_listeners():
+
+        # Need to check if the listener is a type of Client
+        if isinstance(listener, Client):
+
+            # Add it to the listener's queue as a JSON string
+            listener.put(json.dumps({entity: data}))
+
 myWorld.add_set_listener( set_listener )
         
 @app.route('/')
