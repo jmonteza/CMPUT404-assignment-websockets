@@ -62,9 +62,46 @@ function debug(str) {
     var debugDiv = document.getElementById('debug');
     // debugDiv.innerHTML = "" + str;
 }
+
+function sendJSONXMLHTTPRequest(http_method, url, objects, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState==4) {
+            try {
+                if (xhr.status==200) {
+                    //XXX: parse some JSON from the request!
+                    //XXX: Pass the data to the callback!
+                    if (url === "/world"){
+                        callback(JSON.parse(xhr.responseText));
+                    }
+                }
+            } 
+            catch(e) {
+                alert('Error: ' + e.name);
+            }
+        }
+    };
+    //XXX: POST to a URL
+    xhr.open(http_method, url, true);
+    //XXX: set the mimetype and the accept headers!
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept', 'application/json');
+    // Remember to use application/json !
+    if (http_method == "PUT" || http_method == "POST"){
+        xhr.send(JSON.stringify(objects));
+    } else {
+        xhr.send();
+    }
+}
+
+
 debug("Test");
 
 world = {};
+
+function worldCallback(data){
+    world = data;
+}
 
 //XXX: TODO Make this prettier!
 function drawCircle(context,entity) {
@@ -389,11 +426,20 @@ function windowResize() {
   H = canvas.height = window.innerHeight - 50;
 };
 
+
+function getInitialWorld(){
+    // Get the initial state of the world using HTTP Request
+    sendJSONXMLHTTPRequest('GET', '/world', null, worldCallback);
+}
+
+getInitialWorld();
+
+
 window.addEventListener('resize', windowResize);
 
-// get_initial_stroke();
 
-// 30 frames per second
+
+// 60 frames per second
 setInterval( update, 1000/60.0);
 
 
